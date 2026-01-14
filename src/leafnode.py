@@ -8,3 +8,12 @@ class LeafNode(HTMLNode):
     def to_html(self):
         if self.value is None:
             raise ValueError
+        if self.tag is None:
+            return f"{self.value}"
+        if self.props is not None:
+            return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
+        elif self.props is None:
+            return f"<{self.tag}>{self.value}</{self.tag}>"
+
+    def __repr__(self):
+        return f"LeafNode({self.tag}, {self.value}, children:{self.childern}, {self.props})"
