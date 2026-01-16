@@ -1,6 +1,6 @@
 import unittest
 
-from htmlnode import HTMLNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 
 class TestHTMLNode(unittest.TestCase):
@@ -30,6 +30,35 @@ class TestHTMLNode(unittest.TestCase):
         node = HTMLNode("p", "Test value", None, {"class": "example"})
         correct = "HTMLNode(p, Test value, children:None, {'class': 'example'})"
         self.assertEqual(node.__repr__(), correct)
+
+    def test_parent_node(self):
+        child_node = LeafNode("span", "child")
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(parent_node.to_html(), "<div><span>child</span></div>")
+
+    def test_to_html_with_grandchildern(self):
+        granchild_node = LeafNode("b", "grandchild")
+        child_node = ParentNode("span", [granchild_node])
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(
+            parent_node.to_html(), "<div><span><b>grandchild</b></span></div>"
+        )
+
+    def test_to_html_many_children(self):
+
+        node = ParentNode(
+            "p",
+            [
+                LeafNode("b", "Bold text"),
+                LeafNode(None, "Normal text"),
+                LeafNode("i", "italic text"),
+                LeafNode(None, "Normal text"),
+            ],
+        )
+        self.assertEqual(
+            node.to_html(),
+            "<p><b>Bold text</b>Normal text<i>italic text</i>Normal text</p>",
+        )
 
 
 if __name__ == "__main__":
