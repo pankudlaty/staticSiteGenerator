@@ -1,6 +1,6 @@
 import unittest
 
-from textnode import TextNode, TextType
+from textnode import TextNode, TextType, text_node_to_html_node
 
 
 class TestTextNode(unittest.TestCase):
@@ -31,6 +31,48 @@ class TestTextNode(unittest.TestCase):
     def test_is_link(self):
         node = TextNode("Example link", TextType.LINK, "https://www.example.com")
         self.assertIsNotNone(node.url)
+
+
+class TextTextNodeToHTMLNode(unittest.TestCase):
+    def test_text(self):
+        node = TextNode("This is a text node", TextType.TEXT)
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, None)
+        self.assertEqual(html_node.value, "This is a text node")
+
+    def test_bold(self):
+        node = TextNode("This is bold text", TextType.BOLD)
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, "b")
+        self.assertEqual(html_node.value, "This is bold text")
+
+    def test_italic(self):
+        node = TextNode("This is italic text", TextType.ITALIC)
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, "i")
+        self.assertEqual(html_node.value, "This is italic text")
+
+    def test_code(self):
+        node = TextNode("This is code", TextType.CODE)
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, "code")
+        self.assertEqual(html_node.value, "This is code")
+
+    def test_link(self):
+        node = TextNode("Some link", TextType.LINK, "https://some.link")
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, "a")
+        self.assertEqual(html_node.value, "Some link")
+        self.assertEqual(html_node.props, {"href": "https://some.link"})
+
+    def test_image(self):
+        node = TextNode("Some image", TextType.IMAGE, "https://image.img")
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, "img")
+        self.assertEqual(html_node.value, "")
+        self.assertEqual(
+            html_node.props, {"src": "https://image.img", "alt": "Some image"}
+        )
 
 
 if __name__ == "__main__":
