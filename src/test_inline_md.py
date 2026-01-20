@@ -1,6 +1,9 @@
-from typing import Text
 import unittest
-from inline_md import split_nodes_delimiter
+from inline_md import (
+    extract_markdown_images,
+    extract_markdown_links,
+    split_nodes_delimiter,
+)
 
 from textnode import TextNode, TextType
 
@@ -72,4 +75,24 @@ class TestInlineMd(unittest.TestCase):
                 TextNode("some code", TextType.CODE),
             ],
             new_nodes,
+        )
+
+
+class TestExtraction(unittest.TestCase):
+    def test_img_extract(self):
+        matches = extract_markdown_images(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
+
+    def test_link_extract(self):
+        matches = extract_markdown_links(
+            "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
+        )
+        self.assertEqual(
+            [
+                ("to boot dev", "https://www.boot.dev"),
+                ("to youtube", "https://www.youtube.com/@bootdotdev"),
+            ],
+            matches,
         )
