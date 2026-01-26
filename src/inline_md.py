@@ -23,6 +23,27 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
     return new_nodes
 
 
+def split_nodes_image(old_nodes):
+    new_nodes = []
+    for old_node in old_nodes:
+        matches = extract_markdown_images(old_node.text)
+        if len(matches) == 0:
+            new_nodes.append(TextNode(old_node.text, TextType.TEXT))
+            return new_nodes
+        split_nodes = []
+        current_text = old_node.text
+        for i in range(len(matches)):
+            splited = current_text.split(f"![{matches[i][0]}]({matches[i][1]})", 1)
+            if splited[0] != "":
+                split_nodes.append(TextNode(splited[0], TextType.TEXT))
+            split_nodes.append(TextNode(matches[i][0], TextType.IMAGE, matches[i][1]))
+            current_text = splited[-1]
+        if current_text != "":
+            split_nodes.append(TextNode(current_text, TextType.TEXT))
+        new_nodes.extend(split_nodes)
+    return new_nodes
+
+
 def extract_markdown_images(text):
     extracted_img = re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
     return extracted_img

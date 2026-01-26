@@ -3,6 +3,7 @@ from inline_md import (
     extract_markdown_images,
     extract_markdown_links,
     split_nodes_delimiter,
+    split_nodes_image,
 )
 
 from textnode import TextNode, TextType
@@ -95,4 +96,54 @@ class TestExtraction(unittest.TestCase):
                 ("to youtube", "https://www.youtube.com/@bootdotdev"),
             ],
             matches,
+        )
+
+    def test_img_split_only_text(self):
+        node = TextNode("This is only text", TextType.TEXT)
+        new_nodes = split_nodes_image([node])
+        self.assertEqual([TextNode("This is only text", TextType.TEXT)], new_nodes)
+
+    def test_img_split_one(self):
+        node = TextNode(
+            "This is image ![some img](https://img.com) node.", TextType.TEXT
+        )
+        new_nodes = split_nodes_image([node])
+        self.assertEqual(
+            [
+                TextNode("This is image ", TextType.TEXT),
+                TextNode("some img", TextType.IMAGE, "https://img.com"),
+                TextNode(" node.", TextType.TEXT),
+            ],
+            new_nodes,
+        )
+
+    def test_img_split_multi(self):
+        node = TextNode(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png)",
+            TextType.TEXT,
+        )
+        new_nodes = split_nodes_image([node])
+        self.assertEqual(
+            [
+                TextNode("This is text with an ", TextType.TEXT),
+                TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+                TextNode(" and another ", TextType.TEXT),
+                TextNode(
+                    "second image", TextType.IMAGE, "https://i.imgur.com/3elNhQu.png"
+                ),
+            ],
+            new_nodes,
+        )
+
+    def test_img_split_beginning(self):
+        node = TextNode(
+            "![image](https://image.com) node starting with img", TextType.TEXT
+        )
+        new_nodes = split_nodes_image([node])
+        self.assertEqual(
+            [
+                TextNode("image", TextType.IMAGE, "https://image.com"),
+                TextNode(" node starting with img", TextType.TEXT),
+            ],
+            new_nodes,
         )
