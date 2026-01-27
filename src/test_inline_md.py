@@ -4,6 +4,7 @@ from inline_md import (
     extract_markdown_links,
     split_nodes_delimiter,
     split_nodes_image,
+    split_nodes_link,
 )
 
 from textnode import TextNode, TextType
@@ -144,6 +145,55 @@ class TestExtraction(unittest.TestCase):
             [
                 TextNode("image", TextType.IMAGE, "https://image.com"),
                 TextNode(" node starting with img", TextType.TEXT),
+            ],
+            new_nodes,
+        )
+
+    def test_img_split_end(self):
+        node = TextNode(
+            "Image at the end. ![image](https://image.com/img.png)", TextType.TEXT
+        )
+        new_nodes = split_nodes_image([node])
+        self.assertEqual(
+            [
+                TextNode("Image at the end. ", TextType.TEXT),
+                TextNode("image", TextType.IMAGE, "https://image.com/img.png"),
+            ],
+            new_nodes,
+        )
+
+    def test_link_split_only_text(self):
+        node = TextNode("This is only text.", TextType.TEXT)
+        new_nodes = split_nodes_link([node])
+        self.assertEqual([TextNode("This is only text.", TextType.TEXT)], new_nodes)
+
+    def test_link_split_one(self):
+        node = TextNode(
+            "This is a link [link](https://example.com/test) example.", TextType.TEXT
+        )
+        new_nodes = split_nodes_link([node])
+        self.assertEqual(
+            [
+                TextNode("This is a link ", TextType.TEXT),
+                TextNode("link", TextType.LINK, "https://example.com/test"),
+                TextNode(" example.", TextType.TEXT),
+            ],
+            new_nodes,
+        )
+
+    def test_link_split_multiple(self):
+        node = TextNode(
+            "This are couple of links [link1](https://example.com) and another [link2](https://example.at).",
+            TextType.TEXT,
+        )
+        new_nodes = split_nodes_link([node])
+        self.assertEqual(
+            [
+                TextNode("This are couple of links ", TextType.TEXT),
+                TextNode("link1", TextType.LINK, "https://example.com"),
+                TextNode(" and another ", TextType.TEXT),
+                TextNode("link2", TextType.LINK, "https://example.at"),
+                TextNode(".", TextType.TEXT),
             ],
             new_nodes,
         )
