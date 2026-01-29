@@ -197,3 +197,28 @@ class TestExtraction(unittest.TestCase):
             ],
             new_nodes,
         )
+
+    def test_link_split_beginning(self):
+        node = TextNode(
+            "[link](https://example.com) link at the beginning of node", TextType.TEXT
+        )
+        new_nodes = split_nodes_link([node])
+        self.assertEqual(
+            [
+                TextNode("link", TextType.LINK, "https://example.com"),
+                TextNode(" link at the beginning of node", TextType.TEXT),
+            ],
+            new_nodes,
+        )
+
+    def test_link_split_end(self):
+        node = TextNode("Link at the end [link](https://example.com).", TextType.TEXT)
+        new_nodes = split_nodes_link([node])
+        self.assertEqual(
+            [
+                TextNode("Link at the end ", TextType.TEXT),
+                TextNode("link", TextType.LINK, "https://example.com"),
+                TextNode(".", TextType.TEXT),
+            ],
+            new_nodes,
+        )
