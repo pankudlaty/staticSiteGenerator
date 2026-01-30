@@ -73,3 +73,7 @@ def extract_markdown_images(text):
 def extract_markdown_links(text):
     extracted_links = re.findall(r"\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
     return extracted_links
+
+
+def text_to_textnodes(text):
+    pass
