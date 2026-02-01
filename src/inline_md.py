@@ -28,12 +28,15 @@ def split_nodes_image(old_nodes):
     for old_node in old_nodes:
         matches = extract_markdown_images(old_node.text)
         if len(matches) == 0:
-            new_nodes.append(TextNode(old_node.text, TextType.TEXT))
-            return new_nodes
+            new_nodes.append(old_node)
+            continue
+            # return new_nodes
         split_nodes = []
         current_text = old_node.text
         for i in range(len(matches)):
             splited = current_text.split(f"![{matches[i][0]}]({matches[i][1]})", 1)
+            if len(splited) != 2:
+                raise ValueError("invalid markdown, image section not closed")
             if splited[0] != "":
                 split_nodes.append(TextNode(splited[0], TextType.TEXT))
             split_nodes.append(TextNode(matches[i][0], TextType.IMAGE, matches[i][1]))
@@ -49,12 +52,15 @@ def split_nodes_link(old_nodes):
     for old_node in old_nodes:
         matches = extract_markdown_links(old_node.text)
         if len(matches) == 0:
-            new_nodes.append(TextNode(old_node.text, TextType.TEXT))
-            return new_nodes
+            new_nodes.append(old_node)
+            continue
+            # return new_nodes
         split_nodes = []
         current_text = old_node.text
         for i in range(len(matches)):
             splited = current_text.split(f"[{matches[i][0]}]({matches[i][1]})", 1)
+            if len(splited) != 2:
+                raise ValueError("invalid markdown, link section not closed")
             if splited[0] != "":
                 split_nodes.append(TextNode(splited[0], TextType.TEXT))
             split_nodes.append(TextNode(matches[i][0], TextType.LINK, matches[i][1]))
@@ -76,4 +82,10 @@ def extract_markdown_links(text):
 
 
 def text_to_textnodes(text):
-    pass
+    node = TextNode(text, TextType.TEXT)
+    new_nodes = split_nodes_delimiter([node], "**", TextType.BOLD)
+    new_nodes = split_nodes_delimiter(new_nodes, "_", TextType.ITALIC)
+    new_nodes = split_nodes_delimiter(new_nodes, "`", TextType.CODE)
+    new_nodes = split_nodes_image(new_nodes)
+    new_nodes = split_nodes_link(new_nodes)
+    return new_nodes
