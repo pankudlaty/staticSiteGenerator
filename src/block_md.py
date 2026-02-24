@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 from htmlnode import ParentNode
 from textnode import text_node_to_html_node, TextType, TextNode
@@ -142,3 +143,35 @@ def quote_to_html_node(block):
     content = " ".join(new_lines)
     children = text_to_children(content)
     return ParentNode("blockquote", children)
+
+
+def extract_title(markdown):
+    blocks = markdown_to_blocks(markdown)
+    title = ""
+    for block in blocks:
+        if block.startswith("# "):
+            title = block.strip("# ")
+            title = title.strip()
+    if title == "":
+        raise Exception("Title markdown not found")
+    return title
+
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+    md_file = open(from_path, "r")
+    md_content = md_file.read()
+    md_file.close()
+    template = open(template_path, "r")
+    template_content = template.read()
+    template.close()
+    node = markdown_to_html_node(md_content)
+    html = node.to_html()
+    title = extract_title(md_content)
+    generated_page = template_content.replace("{{ Title }}", title)
+    generated_page = generated_page.replace("{{ Content }}", html)
+    dir_path = os.path.dirname(dest_path)
+    os.makedirs(dir_path, exist_ok=True)
+    page = open(dest_path, "w")
+    page.write(generated_page)
+    page.close()
