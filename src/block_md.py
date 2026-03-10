@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from enum import Enum
 from htmlnode import ParentNode
 from textnode import text_node_to_html_node, TextType, TextNode
@@ -175,3 +176,19 @@ def generate_page(from_path, template_path, dest_path):
     page = open(dest_path, "w")
     page.write(generated_page)
     page.close()
+
+
+def generate_page_recursive(dir_path_content, template_path, dest_dir_path):
+    dir_content = os.listdir(dir_path_content)
+    for item in dir_content:
+        src_item_path = os.path.join(dir_path_content, item)
+        dst_item_path = os.path.join(dest_dir_path, item)
+        if os.path.isfile(src_item_path):
+            if src_item_path.endswith(".md"):
+                dst_item_path = Path(dst_item_path)
+                dst_item_path = dst_item_path.with_suffix(".html")
+                generate_page(src_item_path, template_path, dst_item_path)
+            else:
+                continue
+        else:
+            generate_page_recursive(src_item_path, template_path, dst_item_path)
